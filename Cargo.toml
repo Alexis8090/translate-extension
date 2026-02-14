@@ -1,0 +1,129 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2024"
+
+# [workspace]
+# members = ["crates/rusqlite-from-row"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+
+[[bin]]
+name = "main"
+path = "./main.rs"
+
+
+
+
+
+[dependencies]
+# web framework and relative
+axum = { version = "0.8.4", features = [] }
+axum-macros = "0.5.0"
+axum-valid = "0.23.0"
+validator = { version = "0.20.0", features = ["derive"] }
+
+# serde
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+
+# .env config
+dotenvy = "0.15.7"
+
+
+# runtime
+tokio = { version = "1.45.0", default-features = false, features = [
+    "full"
+    # "rt-multi-thread",
+    # "macros",
+    # "parking_lot",使用 parking_lot 替代标准库中的同步原语，如 Mutex 和 RwLock。
+] }
+
+
+# util
+# reqwest = { version = "0.12.5", features = ["json"] }
+
+# error 封装
+thiserror = "2.0.12"
+
+
+
+# time
+time = { version = "0.3.41", features = ["serde", "parsing", "formatting"] } # 确保 time 也有相应特性
+
+
+# sqlite
+# deadpool-sqlite = { version = "0.11.0", features = ["rt_tokio_1"] }
+tokio-rusqlite-folk = "0.6.0"
+rusqlite = { version = "0.35.0", features = ["time","limits","serde_json"] }
+rusqlite-from-row = { package = "rusqlite-from-row-fork3", version = "0.2.4" }
+
+# sqlx = { version = "0.8.5", features = ["sqlite", "runtime-tokio-rustls", "macros", "time"] }
+
+
+# channel
+# kanal = "0.1.1"
+
+
+# util macro
+derivative = "2.1.2"
+
+
+
+# log and trace
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
+num_cpus = "1.17.0"
+socket2 = "0.5.10"
+tower-http = { version = "0.6.6", features = ["cors", "set-header"] }
+hyper = "1.6.0"
+hyper-util = "0.1.14"
+tower = "0.5.2"
+
+
+
+[dev-dependencies]
+criterion = { version = "0.5", features = [
+    "async",
+    "async_tokio",
+    "html_reports",
+] }
+rand = "0.9.1"
+
+
+
+# [lints.rust]
+# nonstandard_style = { level = "allow", priority = 0 }
+# static_mut_refs = { level = "allow", priority = 1 }
+
+
+
+[profile.release]
+# (1) Highest optimization level
+opt-level = 3
+
+# (2) Link Time Optimization (LTO) - Crucial for cross-crate optimizations
+# "fat" gives the best potential runtime performance but significantly increases compile times.
+# "thin" is a good compromise if "fat" is too slow to compile.
+lto = "fat"
+
+# (3) Code Generation Units - Fewer units allow for more global optimizations
+# `1` gives the compiler the most holistic view of your code, potentially leading to
+# the best optimizations, but it disables parallel codegen, slowing down compilation.
+codegen-units = 1
+
+# (4) Panic behavior - Abort on panic is generally faster
+# You already have this, which is good for performance.
+panic = "abort"
+
+# (5) Debug information - None for maximum performance and smallest binary
+# Your current `debug = 1` is for line numbers. `0` strips all debug info.
+# This will make debugging release builds extremely difficult or impossible.
+debug = 0
+
+# (6) Stripping symbols - Strip everything possible
+# `true` or `"symbols"` strips more than just `debuginfo`.
+# Since `debug = 0`, most debug info is gone, but this can strip other symbols too.
+strip = true # or `strip = true`
+
+
